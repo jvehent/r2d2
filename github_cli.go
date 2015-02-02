@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/google/go-github/github"
 	goirc "github.com/thoj/go-ircevent"
+	"log"
 	"strings"
 	"time"
 )
@@ -22,17 +23,23 @@ func watchGithub(irc *goirc.Connection) {
 			irc.Privmsgf(cfg.Irc.Channel, "Invalid repository syntax '%s'. Must be <owner>/<reponame>", repo)
 			continue
 		}
+		// don't run everything at once, we've got time...
+		time.Sleep(time.Second)
 		go func() {
-			err = followRepoEvents(githubCli, splitted[0], splitted[1], evchan)
-			if err != nil {
-				irc.Privmsgf(cfg.Irc.Channel, "github follower crashed with error '%v'", err)
+			for {
+				err = followRepoEvents(githubCli, splitted[0], splitted[1], evchan)
+				if err != nil {
+					log.Println("github follower crashed with error", err)
+				}
+				time.Sleep(60 * time.Second)
 			}
 		}()
 	}
 	go func() {
 		for ev := range evchan {
-			irc.Privmsgf(cfg.Irc.Channel, "%s", ev)
+			// no more than one post per second
 			time.Sleep(time.Second)
+			irc.Privmsgf(cfg.Irc.Channel, "%s", ev)
 		}
 	}()
 
