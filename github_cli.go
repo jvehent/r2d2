@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const githubHelp = "follow commits on multiple github repositories. get the list of followed repos with 'github repos'"
+
 func watchGithub(irc *goirc.Connection) {
 	var err error
 	// start the github watcher
