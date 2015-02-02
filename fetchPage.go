@@ -27,18 +27,18 @@ func fetchPageTitles(irc *goirc.Connection) {
 }
 func fetchTitle(url string) string {
 	resp, err := http.Get(url)
-	defer resp.Body.Close()
 	if err != nil {
-		log.Fatal("Failed to retrieve URL at %s", url)
+		log.Println("Failed to retrieve URL", url)
 		return ""
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		log.Fatal("Get %s returned ", url, resp.Status)
+		log.Println("Get %s returned ", url, resp.Status)
 		return ""
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "Failed to read response from Yahoo Weather api"
+		return "Failed to read response from target"
 	}
 	re := regexp.MustCompile("<title>(.+)</title>")
 	if re.Match(body) {
