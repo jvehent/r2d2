@@ -70,6 +70,8 @@ func main() {
 
 	go watchGithub(irc)
 
+	go fetchPageTitles(irc)
+
 	// add callback that captures messages sent to bot
 	terminate := make(chan bool)
 	irc.AddCallback("PRIVMSG", func(e *goirc.Event) {
