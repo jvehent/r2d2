@@ -54,7 +54,8 @@ func followRepoEvents(cli *github.Client, owner, repo string, evchan chan string
 			return err
 		}
 		for _, ev := range events {
-			if lastID == "null" && !cfg.Irc.Debug {
+			// unless we're in debug mode, we don't print past events
+			if !cfg.Github.Debug && lastID == "null" {
 				break
 			}
 			if *ev.ID == lastID {
@@ -69,7 +70,9 @@ func followRepoEvents(cli *github.Client, owner, repo string, evchan chan string
 				}
 			}
 		}
-		lastID = *events[0].ID
+		if len(events) > 0 {
+			lastID = *events[0].ID
+		}
 		time.Sleep(60 * time.Second)
 	}
 }

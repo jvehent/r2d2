@@ -5,7 +5,10 @@
     nickpass    = "SecretPassPhrase"
     debug       = on
     channel     = "#customchannel"
+    channelpass = "secretkey"
+
 [github]
+    debug = on
     token = "abcdefghijklmnop"
     repos = "jvehent/r2d2"
     repos = "jvehent/cipherscan"

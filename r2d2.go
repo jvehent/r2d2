@@ -13,13 +13,14 @@ import (
 
 type Config struct {
 	Irc struct {
-		Server         string
-		Channel        string
-		Nick, Nickpass string
-		TLS            bool
-		Debug          bool
+		Server               string
+		Channel, ChannelPass string
+		Nick, Nickpass       string
+		TLS                  bool
+		Debug                bool
 	}
 	Github struct {
+		Debug bool
 		Token string
 		Repos []string
 	}
@@ -54,22 +55,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	// place a callback on nickserv identification and wait until it is done
-	if cfg.Irc.Nickpass != "" {
-		identwaiter := make(chan bool)
-		irc.AddCallback("NOTICE", func(e *goirc.Event) {
-			re := regexp.MustCompile("NickServ IDENTIFY")
-			if e.Nick == "NickServ" && re.MatchString(e.Message()) {
-				irc.Privmsgf("NickServ", "IDENTIFY %s", cfg.Irc.Nickpass)
-				identwaiter <- true
-			}
-		})
-		<-identwaiter
-		close(identwaiter)
-		irc.ClearCallback("NOTICE")
-	}
+	// block while performing authentication
+	handleAuth(irc)
+
 	// we are identified, let's continue
-	irc.Join(cfg.Irc.Channel)
+	if cfg.Irc.ChannelPass != "" {
+		// if a channel pass is used, craft a join command
+		// of the form "&<channel>; <key>"
+		irc.Join(cfg.Irc.Channel + " " + cfg.Irc.ChannelPass)
+	} else {
+		irc.Join(cfg.Irc.Channel)
+	}
 	irc.Privmsg(cfg.Irc.Channel, "beep beedibeep dibeep")
 
 	go watchGithub(irc)
@@ -84,7 +80,7 @@ func main() {
 				return
 			}
 			req := strings.Trim(parsed[1], " ")
-			resp := handleRequest(e.Nick, e.Arguments[1], req)
+			resp := handleRequest(e.Nick, req)
 			irc.Privmsgf(cfg.Irc.Channel, "%s: %s", e.Nick, resp)
 		}
 	})
@@ -93,11 +89,42 @@ func main() {
 	irc.Disconnect()
 }
 
+func handleAuth(irc *goirc.Connection) {
+	// place a callback on nickserv identification and wait until it is done
+	if cfg.Irc.Nickpass != "" {
+		identwaiter := make(chan bool)
+		irc.AddCallback("NOTICE", func(e *goirc.Event) {
+			re := regexp.MustCompile("NickServ IDENTIFY")
+			if e.Nick == "NickServ" && re.MatchString(e.Message()) {
+				irc.Privmsgf("NickServ", "IDENTIFY %s", cfg.Irc.Nickpass)
+			}
+			reaccepted := regexp.MustCompile("(?i)Password accepted")
+			if e.Nick == "NickServ" && reaccepted.MatchString(e.Message()) {
+				identwaiter <- true
+			}
+		})
+		for {
+			select {
+			case <-identwaiter:
+				goto identified
+			case <-time.After(5 * time.Second):
+				irc.Privmsgf("NickServ", "IDENTIFY %s", cfg.Irc.Nickpass)
+			}
+		}
+	identified:
+		irc.ClearCallback("NOTICE")
+		close(identwaiter)
+	}
+	return
+}
+
 // handleRequest receives a request as a string and attempt to answer it by looking
 // at the first word as a keyword.
-func handleRequest(nick, srcchan, req string) string {
+func handleRequest(nick, req string) string {
 	command := strings.Split(req, " ")
 	switch command[0] {
+	case "fly":
+		return "PPPPPPFFFFFfffffffffiiiiiiiiiuuuuuuuuuuuuuuuu....................."
 	case "github":
 		if len(command) > 1 && command[1] == "repos" {
 			return githubPrintReposList()
