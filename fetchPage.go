@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 )
 
 func fetchPageTitles(irc *goirc.Connection) {
@@ -46,7 +47,13 @@ func fetchTitle(url string) string {
 		if len(r) < 2 {
 			return ""
 		}
-		return r[1]
+		// convert some common html escape sequences back to readable strings
+		title := r[1]
+		title = strings.Replace(title, "&ndash;", "-", -1)
+		title = strings.Replace(title, "&quot;", "\"", -1)
+		title = strings.Replace(title, "&#39;", "'", -1)
+		title = strings.Replace(title, "&#10;", " ", -1)
+		return title
 	}
 	return ""
 }
