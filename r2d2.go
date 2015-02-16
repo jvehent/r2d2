@@ -24,6 +24,11 @@ type Config struct {
 		Token string
 		Repos []string
 	}
+	Untappd struct {
+		Debug                  bool
+		ClientID, ClientSecret string
+		Users                  []string
+	}
 }
 
 var cfg Config
@@ -66,10 +71,11 @@ func main() {
 	} else {
 		irc.Join(cfg.Irc.Channel)
 	}
-	irc.Privmsg(cfg.Irc.Channel, "beep beedibeep dibeep")
-
+	if cfg.Irc.Debug {
+		irc.Privmsg(cfg.Irc.Channel, "beep beedibeep dibeep")
+	}
 	go watchGithub(irc)
-
+	go watchUntappd(irc)
 	go fetchPageTitles(irc)
 
 	// add callback that captures messages sent to bot
