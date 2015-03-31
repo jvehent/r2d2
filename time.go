@@ -14,7 +14,7 @@ func getTimeIn(timezone string) string {
 		case "france":
 			timezone = "Europe/Paris"
 		case "sarasota":
-			timezone = "America/New_York"
+			return "it's always Mojito time in Sarasota!"
 		case "winnipeg":
 			timezone = "America/Winnipeg"
 		case "pdt":
