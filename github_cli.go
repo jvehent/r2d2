@@ -62,12 +62,13 @@ func followRepoEvents(cli *github.Client, owner, repo string, evchan chan string
 		if err != nil {
 			return err
 		}
+		evctr := 0
 		for _, ev := range events {
-			// unless we're in debug mode, we don't print past events
-			if !cfg.Github.Debug && lastID == "null" {
-				break
-			}
-			if *ev.ID == lastID {
+			evctr++
+			if (evctr == 6) ||
+				// unless we're in debug mode, we don't print past events
+				(!cfg.Github.Debug && lastID == "null") ||
+				(*ev.ID == lastID) {
 				break
 			}
 			switch *ev.Type {
