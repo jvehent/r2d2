@@ -142,12 +142,14 @@ func handleRequest(nick, req string) string {
 		if len(command) > 1 {
 			return printHelpFor(command[1])
 		}
-		return "try 'help <command>', supported commands are: time, github, fly and weather"
+		return "try 'help <command>', supported commands are: time, github, fly, stardate, and weather"
 	case "time":
 		if len(command) > 1 {
 			return getTimeIn(command[1])
 		}
 		return getTimeIn("")
+	case "stardate":
+		return stardateCalc()
 	case "weather":
 		if len(command) < 2 {
 			return weatherHelp
