@@ -8,6 +8,7 @@ depends:
 	$(GO) get code.google.com/p/goauth2/oauth
 	$(GO) get github.com/google/go-github/github
 	$(GO) get github.com/thoj/go-ircevent
+	$(GO) get github.com/oschwald/geoip2-golang
 
 r2d2:
 	$(GO) install r2d2

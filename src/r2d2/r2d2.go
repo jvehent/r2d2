@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/gcfg"
 	"flag"
+	geo "github.com/oschwald/geoip2-golang"
 	goirc "github.com/thoj/go-ircevent"
 	"log"
 	"os"
@@ -28,6 +29,11 @@ type Config struct {
 		Debug                  bool
 		ClientID, ClientSecret string
 		Users                  []string
+	}
+	Maxmind struct {
+		DB        string
+		available bool
+		Reader    *geo.Reader
 	}
 }
 
@@ -77,6 +83,7 @@ func main() {
 	go watchGithub(irc)
 	go watchUntappd(irc)
 	go fetchPageTitles(irc)
+	initMaxmind()
 
 	// add callback that captures messages sent to bot
 	terminate := make(chan bool)
@@ -88,8 +95,10 @@ func main() {
 				return
 			}
 			req := strings.Trim(parsed[1], " ")
-			resp := handleRequest(e.Nick, req)
-			irc.Privmsgf(cfg.Irc.Channel, "%s: %s", e.Nick, resp)
+			resp := handleRequest(e.Nick, req, irc)
+			if resp != "" {
+				irc.Privmsgf(cfg.Irc.Channel, "%s: %s", e.Nick, resp)
+			}
 		}
 	})
 	<-terminate
@@ -128,14 +137,15 @@ func handleAuth(irc *goirc.Connection) {
 
 // handleRequest receives a request as a string and attempt to answer it by looking
 // at the first word as a keyword.
-func handleRequest(nick, req string) string {
+func handleRequest(nick, req string, irc *goirc.Connection) string {
 	command := strings.Split(req, " ")
 	switch command[0] {
 	case "fly":
 		return "PPPPPPFFFFFfffffffffiiiiiiiiiuuuuuuuuuuuuuuuu....................."
 	case "github":
 		if len(command) > 1 && command[1] == "repos" {
-			return githubPrintReposList()
+			githubPrintReposList(irc)
+			return ""
 		}
 		return "try 'help github'"
 	case "help":
@@ -143,6 +153,11 @@ func handleRequest(nick, req string) string {
 			return printHelpFor(command[1])
 		}
 		return "try 'help <command>', supported commands are: time, github, fly, stardate, and weather"
+	case "ip":
+		if len(command) > 1 {
+			return geolocate(command[1])
+		}
+		return "try 'help ip'"
 	case "time":
 		if len(command) > 1 {
 			return getTimeIn(command[1])
@@ -166,6 +181,8 @@ func printHelpFor(command string) string {
 		return githubHelp
 	case "time":
 		return timeHelp
+	case "ip":
+		return geolocationHelp
 	case "weather":
 		return weatherHelp
 	default:
