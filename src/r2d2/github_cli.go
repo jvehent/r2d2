@@ -65,10 +65,11 @@ func followRepoEvents(cli *github.Client, owner, repo string, evchan chan string
 		evctr := 0
 		for _, ev := range events {
 			evctr++
-			if (evctr == 6) ||
-				// unless we're in debug mode, we don't print past events
-				(!cfg.Github.Debug && lastID == "null") ||
-				(*ev.ID == lastID) {
+			// if we're in debug mode, print everything. otherwise, reasons to skip this event:
+			// 1. we have already displayed 5 events in this loop
+			// 2. the lastid is null, which indicates this is the first loop
+			// 3. the current event is the last event, which indicates nothing new happened
+			if !cfg.Github.Debug && ((evctr >= 6) || (lastID == "null") || (*ev.ID == lastID)) {
 				break
 			}
 			switch *ev.Type {
@@ -87,10 +88,17 @@ func followRepoEvents(cli *github.Client, owner, repo string, evchan chan string
 	}
 }
 
-func githubPrintReposList() string {
+func githubPrintReposList(irc *goirc.Connection) {
 	list := "list of followed github repositories: "
 	for _, repo := range cfg.Github.Repos {
 		list += repo + ", "
+		if len(list) > 300 {
+			irc.Privmsgf(cfg.Irc.Channel, "%s", list)
+			list = ""
+		}
 	}
-	return list
+	if len(list)>0 {
+		irc.Privmsgf(cfg.Irc.Channel, "%s", list)
+	}
+	return
 }
