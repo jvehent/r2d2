@@ -143,7 +143,7 @@ func handleRequest(nick, req string, irc *goirc.Connection) string {
 	case "fly":
 		return "PPPPPPFFFFFfffffffffiiiiiiiiiuuuuuuuuuuuuuuuu....................."
 	case "tableflip":
-		return "(ﾉಥ益ಥ）ﾉ ┻━┻"
+		return "(ﾉಥ益ಥ）ﾉ ┻━┻ " + strings.Join(command[1:], " ")
 	case "github":
 		if len(command) > 1 && command[1] == "repos" {
 			githubPrintReposList(irc)
