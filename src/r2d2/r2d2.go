@@ -1,15 +1,16 @@
 package main
 
 import (
-	"code.google.com/p/gcfg"
 	"flag"
-	geo "github.com/oschwald/geoip2-golang"
-	goirc "github.com/thoj/go-ircevent"
 	"log"
 	"os"
 	"regexp"
 	"strings"
 	"time"
+
+	"code.google.com/p/gcfg"
+	geo "github.com/oschwald/geoip2-golang"
+	goirc "github.com/thoj/go-ircevent"
 )
 
 type Config struct {
@@ -142,7 +143,7 @@ func handleRequest(nick, req string, irc *goirc.Connection) string {
 	switch command[0] {
 	case "fly":
 		return "PPPPPPFFFFFfffffffffiiiiiiiiiuuuuuuuuuuuuuuuu....................."
-	case "tableflip":
+	case "flip":
 		return "(ﾉಥ益ಥ）ﾉ ┻━┻ " + strings.Join(command[1:], " ")
 	case "github":
 		if len(command) > 1 && command[1] == "repos" {
@@ -154,7 +155,7 @@ func handleRequest(nick, req string, irc *goirc.Connection) string {
 		if len(command) > 1 {
 			return printHelpFor(command[1])
 		}
-		return "try 'help <command>', supported commands are: time, github, fly, tableflip, stardate, and weather"
+		return "try 'help <command>', supported commands are: time, github, fly, flip, stardate, and weather"
 	case "ip":
 		if len(command) > 1 {
 			return geolocate(command[1])
