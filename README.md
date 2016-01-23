@@ -1,8 +1,6 @@
 R2D2, Mozilla OpSec's IRC bot
 =============================
 
-Get all the dependencies
-
 Build with `make`
 
 Run with `r2d2 -c r2d2.cfg`

@@ -1,13 +1,15 @@
 package main
 
 import (
-	"code.google.com/p/goauth2/oauth"
 	"fmt"
-	"github.com/google/go-github/github"
-	goirc "github.com/thoj/go-ircevent"
 	"log"
+	"math/rand"
 	"strings"
 	"time"
+
+	"code.google.com/p/goauth2/oauth"
+	"github.com/google/go-github/github"
+	goirc "github.com/thoj/go-ircevent"
 )
 
 const githubHelp = "follow commits on multiple github repositories. get the list of followed repos with 'github repos'"
@@ -31,7 +33,8 @@ func watchGithub(irc *goirc.Connection) {
 				if err != nil {
 					log.Println("github follower crashed with error", err)
 				}
-				time.Sleep(60 * time.Second)
+				sleepfor := time.Duration(60 + (rand.Int() % 60))
+				time.Sleep(sleepfor * time.Second)
 			}
 		}()
 	}
@@ -97,7 +100,7 @@ func githubPrintReposList(irc *goirc.Connection) {
 			list = ""
 		}
 	}
-	if len(list)>0 {
+	if len(list) > 0 {
 		irc.Privmsgf(cfg.Irc.Channel, "%s", list)
 	}
 	return

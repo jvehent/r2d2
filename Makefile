@@ -1,17 +1,18 @@
-PROJS = r2d2
-GO = GOPATH=$(shell pwd):$(shell go env GOROOT)/bin go
+GO          := GO15VENDOREXPERIMENT=1 go
+GOGETTER    := GOPATH=$(shell pwd)/.tmpdeps go get -d
 
-all: $(PROJS)
+all: install
 
-depends:
-	$(GO) get code.google.com/p/gcfg
-	$(GO) get code.google.com/p/goauth2/oauth
-	$(GO) get github.com/google/go-github/github
-	$(GO) get github.com/thoj/go-ircevent
-	$(GO) get github.com/oschwald/geoip2-golang
+install:
+		$(GO) install github.com/jvehent/r2d2
 
-r2d2:
-	$(GO) install r2d2
-
-clean:
-	rm -f bin/r2d2
+go_vendor_dependencies::
+	$(GOGETTER) gopkg.in/gcfg.v1
+	$(GOGETTER) code.google.com/p/goauth2/oauth
+	$(GOGETTER) github.com/google/go-github/github
+	$(GOGETTER) github.com/thoj/go-ircevent
+	#$(GOGETTER) github.com/oschwald/geoip2-golang
+	echo 'removing .git from vendored pkg and moving them to vendor'
+	find .tmpdeps/src -type d -name ".git" ! -name ".gitignore" -exec rm -rf {} \; || exit 0
+	cp -ar .tmpdeps/src/* vendor/
+	rm -rf .tmpdeps
