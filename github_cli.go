@@ -26,15 +26,15 @@ func watchGithub(irc *goirc.Connection) {
 			continue
 		}
 		// don't run everything at once, we've got time...
-		time.Sleep(time.Second)
+		time.Sleep(3 * time.Second)
 		go func() {
 			for {
+				sleepfor := time.Duration(150 + (rand.Int() % 150))
+				time.Sleep(sleepfor * time.Second)
 				err = followRepoEvents(githubCli, splitted[0], splitted[1], evchan)
 				if err != nil {
 					log.Println("github follower crashed with error", err)
 				}
-				sleepfor := time.Duration(60 + (rand.Int() % 60))
-				time.Sleep(sleepfor * time.Second)
 			}
 		}()
 	}

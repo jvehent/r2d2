@@ -3,11 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	goirc "github.com/thoj/go-ircevent"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
+
+	goirc "github.com/thoj/go-ircevent"
 )
 
 type UntappdAPI struct {
@@ -54,6 +56,8 @@ func watchUntappd(irc *goirc.Connection) {
 	lastCheckins := make(map[string]float64)
 	for {
 		for _, user := range cfg.Untappd.Users {
+			sleepfor := time.Duration(150 + (rand.Int() % 150))
+			time.Sleep(sleepfor * time.Second)
 			// store the last checkin ID, to avoid printing the same checkin twice
 			var lastcheckin float64
 			if _, ok := lastCheckins[user]; ok {
@@ -70,7 +74,6 @@ func watchUntappd(irc *goirc.Connection) {
 					irc.Privmsgf(cfg.Irc.Channel, "%s", ev)
 				}
 			}
-			time.Sleep(60 * time.Second)
 		}
 	}
 }
