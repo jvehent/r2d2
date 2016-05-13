@@ -1,9 +1,10 @@
 package main
 
 import (
-	geo "github.com/oschwald/geoip2-golang"
 	"fmt"
 	"net"
+
+	geo "github.com/oschwald/geoip2-golang"
 )
 
 const geolocationHelp = "geolocate an ip address using maxmind. syntax: ip <ip>"

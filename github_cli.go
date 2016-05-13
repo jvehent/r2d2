@@ -15,6 +15,15 @@ import (
 const githubHelp = "follow commits on multiple github repositories. get the list of followed repos with 'github repos'"
 
 func watchGithub(irc *goirc.Connection) {
+	irchan := cfg.Irc.Channel
+	if cfg.Github.Channel != "" {
+		if cfg.Github.ChannelPass != "" {
+			irc.Join(cfg.Github.Channel + " " + cfg.Github.ChannelPass)
+		} else {
+			irc.Join(cfg.Github.Channel)
+		}
+		irchan = cfg.Github.Channel
+	}
 	var err error
 	// start the github watcher
 	evchan := make(chan string)
@@ -42,7 +51,7 @@ func watchGithub(irc *goirc.Connection) {
 		for ev := range evchan {
 			// no more than one post per second
 			time.Sleep(time.Second)
-			irc.Privmsgf(cfg.Irc.Channel, "%s", ev)
+			irc.Privmsgf(irchan, "%s", ev)
 		}
 	}()
 

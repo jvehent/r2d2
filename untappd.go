@@ -53,6 +53,15 @@ func watchUntappd(irc *goirc.Connection) {
 		userEvents []string
 		err        error
 	)
+	irchan := cfg.Irc.Channel
+	if cfg.Untappd.Channel != "" {
+		if cfg.Untappd.ChannelPass != "" {
+			irc.Join(cfg.Untappd.Channel + " " + cfg.Untappd.ChannelPass)
+		} else {
+			irc.Join(cfg.Untappd.Channel)
+		}
+		irchan = cfg.Untappd.Channel
+	}
 	lastCheckins := make(map[string]float64)
 	for {
 		for _, user := range cfg.Untappd.Users {
@@ -71,7 +80,7 @@ func watchUntappd(irc *goirc.Connection) {
 				log.Println("Failed to get", user, "'s Untappd activity:", err)
 			} else {
 				for _, ev := range userEvents {
-					irc.Privmsgf(cfg.Irc.Channel, "%s", ev)
+					irc.Privmsgf(irchan, "%s", ev)
 				}
 			}
 		}

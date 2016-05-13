@@ -22,14 +22,16 @@ type Config struct {
 		Debug                bool
 	}
 	Github struct {
-		Debug bool
-		Token string
-		Repos []string
+		Debug                bool
+		Token                string
+		Repos                []string
+		Channel, ChannelPass string
 	}
 	Untappd struct {
 		Debug                  bool
 		ClientID, ClientSecret string
 		Users                  []string
+		Channel, ChannelPass   string
 	}
 	Maxmind struct {
 		DB        string
