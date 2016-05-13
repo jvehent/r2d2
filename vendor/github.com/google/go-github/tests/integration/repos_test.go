@@ -3,14 +3,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// +build integration
+
 package tests
 
 import (
 	"net/http"
+	"reflect"
 	"testing"
 
 	"github.com/google/go-github/github"
-	"reflect"
 )
 
 func TestRepositories_CRUD(t *testing.T) {
@@ -118,8 +120,8 @@ func TestRepositories_EditBranches(t *testing.T) {
 
 	branch.Protection.Enabled = github.Bool(true)
 	branch.Protection.RequiredStatusChecks = &github.RequiredStatusChecks{
-		EnforcementLevel:github.String("everyone"),
-		Contexts:&[]string{"continous-integration"},
+		EnforcementLevel: github.String("everyone"),
+		Contexts:         &[]string{"continous-integration"},
 	}
 	branch, _, err = client.Repositories.EditBranch(*repo.Owner.Login, *repo.Name, "master", branch)
 	if err != nil {

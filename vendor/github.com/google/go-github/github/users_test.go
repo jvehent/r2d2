@@ -32,6 +32,7 @@ func TestUser_marshall(t *testing.T) {
 		Followers:   Int(1),
 		Following:   Int(1),
 		CreatedAt:   &Timestamp{referenceTime},
+		SuspendedAt: &Timestamp{referenceTime},
 	}
 	want := `{
 		"login": "l",
@@ -48,6 +49,7 @@ func TestUser_marshall(t *testing.T) {
 		"followers": 1,
 		"following": 1,
 		"created_at": ` + referenceTimeStr + `,
+		"suspended_at": ` + referenceTimeStr + `,
 		"url": "u"
 	}`
 	testJSONMarshal(t, u, want)
@@ -96,6 +98,26 @@ func TestUsersService_Get_specifiedUser(t *testing.T) {
 func TestUsersService_Get_invalidUser(t *testing.T) {
 	_, _, err := client.Users.Get("%")
 	testURLParseError(t, err)
+}
+
+func TestUsersService_GetByID(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/user/1", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		fmt.Fprint(w, `{"id":1}`)
+	})
+
+	user, _, err := client.Users.GetByID(1)
+	if err != nil {
+		t.Errorf("Users.GetByID returned error: %v", err)
+	}
+
+	want := &User{ID: Int(1)}
+	if !reflect.DeepEqual(user, want) {
+		t.Errorf("Users.GetByID returned %+v, want %+v", user, want)
+	}
 }
 
 func TestUsersService_Edit(t *testing.T) {
