@@ -63,6 +63,9 @@ func main() {
 	irc.UseTLS = cfg.Irc.TLS
 	irc.VerboseCallbackHandler = cfg.Irc.Debug
 	irc.Debug = cfg.Irc.Debug
+	irc.Timeout = 300 * time.Second
+	irc.PingFreq = 10 * time.Second
+	irc.KeepAlive = 10 * time.Second
 	err = irc.Connect(cfg.Irc.Server)
 	if err != nil {
 		log.Fatal("Connection to IRC server failed: %v", err)
