@@ -1,12 +1,13 @@
 package main
 
 import (
-	goirc "github.com/thoj/go-ircevent"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"regexp"
 	"strings"
+
+	goirc "github.com/thoj/go-ircevent"
 )
 
 func fetchPageTitles(irc *goirc.Connection) {
@@ -34,7 +35,7 @@ func fetchTitle(url string) string {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		log.Println("Get %s returned ", url, resp.Status)
+		log.Printf("Get %q returned %q", url, resp.Status)
 		return ""
 	}
 	body, err := ioutil.ReadAll(resp.Body)
