@@ -65,7 +65,7 @@ func watchUntappd(irc *goirc.Connection) {
 	lastCheckins := make(map[string]float64)
 	for {
 		for _, user := range cfg.Untappd.Users {
-			sleepfor := time.Duration(150 + (rand.Int() % 150))
+			sleepfor := time.Duration(30 + (rand.Int() % 30))
 			time.Sleep(sleepfor * time.Second)
 			// store the last checkin ID, to avoid printing the same checkin twice
 			var lastcheckin float64
