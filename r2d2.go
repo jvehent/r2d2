@@ -149,15 +149,14 @@ func handleRequest(nick, req string, irc *goirc.Connection) string {
 		return "(ﾉಥ益ಥ）ﾉ ┻━┻ " + strings.Join(command[1:], " ")
 	case "github":
 		if len(command) > 1 && command[1] == "repos" {
-			githubPrintReposList(irc)
-			return ""
+			return githubPrintReposList()
 		}
 		return "try 'help github'"
 	case "help":
 		if len(command) > 1 {
 			return printHelpFor(command[1])
 		}
-		return "try 'help <command>', supported commands are: time, github, fly, flip, stardate, and weather"
+		return "try 'help <command>', supported commands are: time, github, fly, flip, stardate, untappd and weather"
 	case "ip":
 		if len(command) > 1 {
 			return geolocate(command[1])

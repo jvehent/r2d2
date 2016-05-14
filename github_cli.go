@@ -101,17 +101,6 @@ func followRepoEvents(cli *github.Client, owner, repo string, evchan chan string
 	}
 }
 
-func githubPrintReposList(irc *goirc.Connection) {
-	list := "list of followed github repositories: "
-	for _, repo := range cfg.Github.Repos {
-		list += repo + ", "
-		if len(list) > 300 {
-			irc.Privmsgf(cfg.Irc.Channel, "%s", list)
-			list = ""
-		}
-	}
-	if len(list) > 0 {
-		irc.Privmsgf(cfg.Irc.Channel, "%s", list)
-	}
-	return
+func githubPrintReposList() string {
+	return "list of followed github repositories: " + strings.Join(cfg.Github.Repos, ", ")
 }
