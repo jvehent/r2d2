@@ -175,6 +175,11 @@ func handleRequest(nick, req string, irc *goirc.Connection) string {
 			return weatherHelp
 		}
 		return getYahooForecast(strings.Join(command[1:], " "))
+	case "untappd":
+		if len(command) > 1 && command[1] == "users" {
+			return untappdPrintUsers()
+		}
+		return "try 'help untappd'"
 	default:
 		return "I do not know how to answer this..."
 	}
@@ -190,6 +195,8 @@ func printHelpFor(command string) string {
 		return geolocationHelp
 	case "weather":
 		return weatherHelp
+	case "untappd":
+		return untappdHelp
 	default:
 		return "there is no help for " + command
 	}

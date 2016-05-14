@@ -7,10 +7,13 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 
 	goirc "github.com/thoj/go-ircevent"
 )
+
+const untappdHelp = "Follow the check-ins of selected users of Untappd.com. Get the list of followed users with 'untappd users'."
 
 type UntappdAPI struct {
 	Response UntappdResponse `json:"response"`
@@ -141,4 +144,8 @@ func getUntappdActivityFor(user string, lastcheckin float64) (userEvents []strin
 		newlastcheckin = r.Response.Checkins.Items[0].ID
 	}
 	return
+}
+
+func untappdPrintUsers() string {
+	return "list of followed untappd users: " + strings.Join(cfg.Untappd.Users, ", ")
 }
