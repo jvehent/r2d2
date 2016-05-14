@@ -91,16 +91,34 @@ func main() {
 	// add callback that captures messages sent to bot
 	terminate := make(chan bool)
 	irc.AddCallback("PRIVMSG", func(e *goirc.Event) {
+		if cfg.Irc.Debug {
+			log.Printf("%+v", e)
+		}
 		re := regexp.MustCompile("^" + cfg.Irc.Nick + ":(.+)$")
 		if re.MatchString(e.Message()) {
+			if cfg.Irc.Debug {
+				log.Printf("message is for %q, processing %q", cfg.Irc.Nick, e.Message())
+			}
 			parsed := re.FindStringSubmatch(e.Message())
 			if len(parsed) != 2 {
+				log.Printf("Could not find a message body to work with. event=%+V", e)
 				return
 			}
+			irchan := cfg.Irc.Channel
+			if len(e.Arguments) > 0 {
+				irchan = e.Arguments[0]
+			}
 			req := strings.Trim(parsed[1], " ")
-			resp := handleRequest(e.Nick, req, irc)
-			if resp != "" {
-				irc.Privmsgf(cfg.Irc.Channel, "%s: %s", e.Nick, resp)
+			resp := handleRequest(req)
+			log.Printf("responding with %q", resp)
+			for i := 0; i <= len(resp); i += 300 {
+				upper := 300
+				if upper > len(resp[i:]) {
+					upper = len(resp[i:])
+				}
+				// reply to the channel the request came from
+				irc.Privmsgf(irchan, "%s: %s", e.Nick, resp[i:upper])
+				log.Printf("channel: %q; caller: %q; msg: %q", e.Arguments[0], e.Nick, resp[i:upper])
 			}
 		}
 	})
@@ -140,7 +158,8 @@ func handleAuth(irc *goirc.Connection) {
 
 // handleRequest receives a request as a string and attempt to answer it by looking
 // at the first word as a keyword.
-func handleRequest(nick, req string, irc *goirc.Connection) string {
+func handleRequest(req string) string {
+	log.Printf("handling request %q", req)
 	command := strings.Split(req, " ")
 	switch command[0] {
 	case "fly":
