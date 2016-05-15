@@ -16,12 +16,17 @@ func fetchPageTitles(irc *goirc.Connection) {
 		if rehttp.MatchString(e.Message()) {
 			url := rehttp.FindStringSubmatch(e.Message())
 			if len(url) < 2 {
+				log.Printf("Could not find a message body to work with. event=%+V", e)
 				return
+			}
+			irchan := cfg.Irc.Channel
+			if len(e.Arguments) > 0 {
+				irchan = e.Arguments[0]
 			}
 			title := fetchTitle(url[1])
 			log.Printf("Retrieved tile '%s' from url %s\n", title, url[1])
 			if title != "" {
-				irc.Privmsgf(cfg.Irc.Channel, "Title: %s", title)
+				irc.Privmsgf(irchan, "Title: %s", title)
 			}
 		}
 	})
