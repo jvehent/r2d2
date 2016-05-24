@@ -35,11 +35,21 @@ type UntappdItem struct {
 	User    UntappdUser    `json:"user"`
 	Beer    UntappdBeer    `json:"beer"`
 	Brewery UntappdBrewery `json:"brewery"`
+	Badges  UntappdBadges  `json:"badges"`
+}
+
+type UntappdBadges struct {
+	Items []UntappdBadgeItem `json:"items"`
+}
+
+type UntappdBadgeItem struct {
+	Name        string `json:"badge_name"`
 }
 
 type UntappdUser struct {
 	Name string `json:"user_name"`
 }
+
 type UntappdBeer struct {
 	Name  string  `json:"beer_name"`
 	Style string  `json:"beer_style"`
@@ -47,8 +57,14 @@ type UntappdBeer struct {
 }
 
 type UntappdBrewery struct {
-	Name    string `json:"brewery_name"`
-	Country string `json:"country_name"`
+	Name    	string			`json:"brewery_name"`
+	Country		string			`json:"country_name"`
+	Location	UntappdBreweryLocation	`json:"location"`
+}
+
+type UntappdBreweryLocation struct {
+	City	string	`json:"brewery_city"`
+	State	string	`json:"brewery_state"`
 }
 
 func watchUntappd(irc *goirc.Connection) {
@@ -135,9 +151,22 @@ func getUntappdActivityFor(user string, lastcheckin float64) (userEvents []strin
 			// this item and the followings have already been seen
 			break
 		}
+		var location []string
+		if item.Brewery.Location.City != "" {
+			location = append(location, item.Brewery.Location.City)
+		}
+		if item.Brewery.Location.State != "" {
+			location = append(location, item.Brewery.Location.State)
+		}
+		location = append(location, item.Brewery.Country)
 		userEvents = append(userEvents, fmt.Sprintf("%s is drinking a %s; %.1f%% %s from %s, %s. Score: %.1f/5 - %s\n",
 			item.User.Name, item.Beer.Name, item.Beer.Abv, item.Beer.Style, item.Brewery.Name,
-			item.Brewery.Country, item.Score, item.Comment))
+			strings.Join(location, ", "), item.Score, item.Comment))
+
+		for _, badge := range item.Badges.Items {
+			userEvents = append(userEvents, fmt.Sprintf("%s earned a badge: %s",
+				item.User.Name, badge.Name))
+		}
 	}
 	// store the ID of the first item as the last checked in
 	if len(r.Response.Checkins.Items) > 0 {
