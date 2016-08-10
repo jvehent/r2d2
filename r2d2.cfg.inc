@@ -14,3 +14,4 @@
     repos = "jvehent/cipherscan"
     repos = "jeffbryner/MozDef"
     repos = "mozilla/mig"
+    repos = "mozilla/ssh_scan"
