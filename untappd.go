@@ -99,7 +99,7 @@ func watchUntappd(irc *goirc.Connection) {
 				log.Println("Failed to get", user, "'s Untappd activity:", err)
 			} else {
 				for _, ev := range userEvents {
-					irc.Privmsgf(irchan, "%s", ev)
+					irc.Notice(irchan, ev)
 				}
 			}
 		}
