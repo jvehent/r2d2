@@ -87,6 +87,9 @@ func TestUsers_Update(t *testing.T) {
 	// set location back to the original value
 	u.Location = &location
 	_, _, err = client.Users.Edit(u)
+	if err != nil {
+		t.Fatalf("Users.Edit returned error: %v", err)
+	}
 }
 
 func TestUsers_Emails(t *testing.T) {
@@ -170,6 +173,7 @@ func TestUsers_Keys(t *testing.T) {
 		return
 	}
 
+	// TODO: make this integration test work for any authenticated user.
 	keys, _, err = client.Users.ListKeys("", nil)
 	if err != nil {
 		t.Fatalf("Users.ListKeys('') returned error: %v", err)
