@@ -9,4 +9,4 @@ install:
 vendor:
 	govend -u
 
-.PHONY: vendor
+.PHONY: vendor install

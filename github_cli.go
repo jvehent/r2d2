@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"code.google.com/p/goauth2/oauth"
+	"golang.org/x/oauth2"
 
 	"github.com/google/go-github/github"
 	goirc "github.com/thoj/go-ircevent"
@@ -59,13 +59,11 @@ func watchGithub(irc *goirc.Connection) {
 }
 
 func makeGithubClient(token string) *github.Client {
-	if token != "" {
-		t := &oauth.Transport{
-			Token: &oauth.Token{AccessToken: token},
-		}
-		return github.NewClient(t.Client())
-	}
-	return github.NewClient(nil)
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	tc := oauth2.NewClient(oauth2.NoContext, ts)
+	return github.NewClient(tc)
 }
 
 func followRepoEvents(cli *github.Client, owner, repo string, evchan chan string) (err error) {

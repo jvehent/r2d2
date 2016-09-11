@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"code.google.com/p/gcfg"
 	geo "github.com/oschwald/geoip2-golang"
 	goirc "github.com/thoj/go-ircevent"
+	"gopkg.in/gcfg.v1"
 )
 
 type Config struct {
