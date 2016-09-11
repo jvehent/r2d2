@@ -43,7 +43,7 @@ type UntappdBadges struct {
 }
 
 type UntappdBadgeItem struct {
-	Name        string `json:"badge_name"`
+	Name string `json:"badge_name"`
 }
 
 type UntappdUser struct {
@@ -57,14 +57,14 @@ type UntappdBeer struct {
 }
 
 type UntappdBrewery struct {
-	Name    	string			`json:"brewery_name"`
-	Country		string			`json:"country_name"`
-	Location	UntappdBreweryLocation	`json:"location"`
+	Name     string                 `json:"brewery_name"`
+	Country  string                 `json:"country_name"`
+	Location UntappdBreweryLocation `json:"location"`
 }
 
 type UntappdBreweryLocation struct {
-	City	string	`json:"brewery_city"`
-	State	string	`json:"brewery_state"`
+	City  string `json:"brewery_city"`
+	State string `json:"brewery_state"`
 }
 
 func watchUntappd(irc *goirc.Connection) {
@@ -99,7 +99,7 @@ func watchUntappd(irc *goirc.Connection) {
 				log.Println("Failed to get", user, "'s Untappd activity:", err)
 			} else {
 				for _, ev := range userEvents {
-					irc.Privmsgf(irchan, "%s", ev)
+					irc.Notice(irchan, ev)
 				}
 			}
 		}
