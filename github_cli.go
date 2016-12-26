@@ -40,10 +40,11 @@ func watchGithub(irc *goirc.Connection) {
 		// don't run everything at once, we've got time...
 		time.Sleep(3 * time.Second)
 		go func() {
+			destinationChannel := irchan
 			for {
 				sleepfor := time.Duration(150 + (rand.Int() % 150))
 				time.Sleep(sleepfor * time.Second)
-				err = followRepoEvents(irc, githubCli, reposplit[0], reposplit[1], irchan)
+				err = followRepoEvents(irc, githubCli, reposplit[0], reposplit[1], destinationChannel)
 				if err != nil {
 					log.Println("github follower crashed with error", err)
 				}
@@ -84,7 +85,7 @@ func followRepoEvents(irc *goirc.Connection, cli *github.Client, owner, repo, ir
 				if !strings.HasSuffix(*pe.(*github.PushEvent).Ref, "/master") {
 					// we only care about commits on the master branch
 					if cfg.Github.Debug {
-						log.Println("github: ignoring change on ref", *pe.(*github.PushEvent).Ref)
+						log.Println("github: ignoring non-master change on ref", *pe.(*github.PushEvent).Ref)
 					}
 					continue
 				}
