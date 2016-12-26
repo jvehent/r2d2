@@ -43,7 +43,7 @@ func watchGithub(irc *goirc.Connection) {
 			for {
 				sleepfor := time.Duration(150 + (rand.Int() % 150))
 				time.Sleep(sleepfor * time.Second)
-				err = followRepoEvents(irc, githubCli, splitted[0], splitted[1], irchan)
+				err = followRepoEvents(irc, githubCli, reposplit[0], reposplit[1], irchan)
 				if err != nil {
 					log.Println("github follower crashed with error", err)
 				}
@@ -103,5 +103,9 @@ func followRepoEvents(irc *goirc.Connection, cli *github.Client, owner, repo, ir
 }
 
 func githubPrintReposList() string {
-	return "list of followed github repositories: " + strings.Join(cfg.Github.Repos, ", ")
+	str := "list of followed github repositories: "
+	for _, repo := range cfg.Github.Repos {
+		str += strings.Split(repo, " ")[0] + ","
+	}
+	return str
 }
