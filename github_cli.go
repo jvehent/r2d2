@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
 	"strings"
@@ -16,24 +15,27 @@ import (
 const githubHelp = "follow commits on multiple github repositories. get the list of followed repos with 'github repos'"
 
 func watchGithub(irc *goirc.Connection) {
-	irchan := cfg.Irc.Channel
+	irchan := strings.Split(cfg.Irc.Channels[0], " ")[0]
 	if cfg.Github.Channel != "" {
-		if cfg.Github.ChannelPass != "" {
-			irc.Join(cfg.Github.Channel + " " + cfg.Github.ChannelPass)
-		} else {
-			irc.Join(cfg.Github.Channel)
-		}
+		irc.Join(cfg.Github.Channel)
 		irchan = cfg.Github.Channel
 	}
 	var err error
 	// start the github watcher
-	evchan := make(chan string)
 	githubCli := makeGithubClient(cfg.Github.Token)
 	for _, repo := range cfg.Github.Repos {
-		splitted := strings.Split(repo, "/")
-		if len(splitted) != 2 {
-			irc.Privmsgf(cfg.Irc.Channel, "Invalid repository syntax '%s'. Must be <owner>/<reponame>", repo)
+		// first split on whitespaces. first part is the repo,
+		// optional second and third are the irc chan and pass
+		splitted := strings.Split(repo, " ")
+		reposplit := strings.Split(splitted[0], "/")
+		if len(reposplit) != 2 {
+			irc.Privmsgf(irchan, "Invalid repository syntax '%s'. Must be 'owner/reponame <optional:#ircchan> <optional:channelpass>'", repo)
 			continue
+		}
+		// if there's a custom channel to send messages to, store it
+		if len(splitted) > 1 {
+			irc.Join(strings.Join(splitted[1:], " "))
+			irchan = splitted[1]
 		}
 		// don't run everything at once, we've got time...
 		time.Sleep(3 * time.Second)
@@ -41,20 +43,13 @@ func watchGithub(irc *goirc.Connection) {
 			for {
 				sleepfor := time.Duration(150 + (rand.Int() % 150))
 				time.Sleep(sleepfor * time.Second)
-				err = followRepoEvents(githubCli, splitted[0], splitted[1], evchan)
+				err = followRepoEvents(irc, githubCli, splitted[0], splitted[1], irchan)
 				if err != nil {
 					log.Println("github follower crashed with error", err)
 				}
 			}
 		}()
 	}
-	go func() {
-		for ev := range evchan {
-			// no more than one post per second
-			time.Sleep(time.Second)
-			irc.Privmsgf(irchan, "%s", ev)
-		}
-	}()
 
 }
 
@@ -66,7 +61,7 @@ func makeGithubClient(token string) *github.Client {
 	return github.NewClient(tc)
 }
 
-func followRepoEvents(cli *github.Client, owner, repo string, evchan chan string) (err error) {
+func followRepoEvents(irc *goirc.Connection, cli *github.Client, owner, repo, irchan string) (err error) {
 	lastID := "null"
 	for {
 		events, _, err := cli.Activity.ListRepositoryEvents(owner, repo, nil)
@@ -86,8 +81,16 @@ func followRepoEvents(cli *github.Client, owner, repo string, evchan chan string
 			switch *ev.Type {
 			case "PushEvent":
 				pe := ev.Payload()
+				if !strings.HasSuffix(*pe.(*github.PushEvent).Ref, "/master") {
+					// we only care about commits on the master branch
+					if cfg.Github.Debug {
+						log.Println("github: ignoring change on ref", *pe.(*github.PushEvent).Ref)
+					}
+					continue
+				}
 				for _, c := range pe.(*github.PushEvent).Commits {
-					evchan <- fmt.Sprintf("\x032[%s/%s]\x03 %s - %s \x038https://github.com/%s/%s/commit/%s\x03",
+					time.Sleep(time.Second)
+					irc.Privmsgf(irchan, "\x032[%s/%s]\x03 %s - %s \x038https://github.com/%s/%s/commit/%s\x03",
 						owner, repo, *c.Author.Name, *c.Message, owner, repo, *c.SHA)
 				}
 			}

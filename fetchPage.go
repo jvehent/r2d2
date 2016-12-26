@@ -19,7 +19,7 @@ func fetchPageTitles(irc *goirc.Connection) {
 				log.Printf("Could not find a message body to work with. event=%+V", e)
 				return
 			}
-			irchan := cfg.Irc.Channel
+			irchan := strings.Split(cfg.Irc.Channels[0], " ")[0]
 			if len(e.Arguments) > 0 {
 				irchan = e.Arguments[0]
 			}

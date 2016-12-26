@@ -72,14 +72,10 @@ func watchUntappd(irc *goirc.Connection) {
 		userEvents []string
 		err        error
 	)
-	irchan := cfg.Irc.Channel
+	irchan := strings.Split(cfg.Irc.Channels[0], " ")[0]
 	if cfg.Untappd.Channel != "" {
-		if cfg.Untappd.ChannelPass != "" {
-			irc.Join(cfg.Untappd.Channel + " " + cfg.Untappd.ChannelPass)
-		} else {
-			irc.Join(cfg.Untappd.Channel)
-		}
-		irchan = cfg.Untappd.Channel
+		irc.Join(cfg.Untappd.Channel)
+		irchan = strings.Split(cfg.Untappd.Channel, " ")[0]
 	}
 	lastCheckins := make(map[string]float64)
 	for {

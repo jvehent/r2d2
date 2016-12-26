@@ -15,28 +15,34 @@ import (
 
 type Config struct {
 	Irc struct {
-		Server               string
-		Channel, ChannelPass string
-		Nick, Nickpass       string
-		TLS                  bool
-		Debug                bool
+		Server         string
+		Channels       []string
+		Nick, Nickpass string
+		TLS            bool
+		Debug          bool
 	}
 	Github struct {
-		Debug                bool
-		Token                string
-		Repos                []string
-		Channel, ChannelPass string
+		Debug   bool
+		Token   string
+		Repos   []string
+		Channel string
 	}
 	Untappd struct {
 		Debug                  bool
 		ClientID, ClientSecret string
 		Users                  []string
-		Channel, ChannelPass   string
+		Channel                string
 	}
 	Maxmind struct {
 		DB        string
 		available bool
 		Reader    *geo.Reader
+	}
+	Strava struct {
+		Channel      string
+		AccessToken  string
+		ClubID       int64
+		GoogleAPIKey string
 	}
 }
 
@@ -75,19 +81,16 @@ func main() {
 	// block while performing authentication
 	handleAuth(irc)
 
-	// we are identified, let's continue
-	if cfg.Irc.ChannelPass != "" {
-		// if a channel pass is used, craft a join command
-		// of the form "&<channel>; <key>"
-		irc.Join(cfg.Irc.Channel + " " + cfg.Irc.ChannelPass)
-	} else {
-		irc.Join(cfg.Irc.Channel)
-	}
-	if cfg.Irc.Debug {
-		irc.Privmsg(cfg.Irc.Channel, "beep beedibeep dibeep")
+	// join all configured channels
+	for _, chp := range cfg.Irc.Channels {
+		irc.Join(chp)
+		if cfg.Irc.Debug {
+			irc.Privmsg(strings.Split(chp, " ")[0], "beep beedibeep dibeep")
+		}
 	}
 	go watchGithub(irc)
 	go watchUntappd(irc)
+	go watchStrava(irc)
 	go fetchPageTitles(irc)
 	initMaxmind()
 
@@ -107,10 +110,7 @@ func main() {
 				log.Printf("Could not find a message body to work with. event=%+V", e)
 				return
 			}
-			irchan := cfg.Irc.Channel
-			if len(e.Arguments) > 0 {
-				irchan = e.Arguments[0]
-			}
+			irchan := e.Arguments[0]
 			req := strings.Trim(parsed[1], " ")
 			resp := handleRequest(req)
 			log.Printf("responding with %q", resp)
@@ -168,7 +168,22 @@ func handleRequest(req string) string {
 	case "fly":
 		return "PPPPPPFFFFFfffffffffiiiiiiiiiuuuuuuuuuuuuuuuu....................."
 	case "flip":
-		return "(ﾉಥ益ಥ）ﾉ ┻━┻ " + strings.Join(command[1:], " ")
+		input := strings.Join(command[1:], " ")
+		// Get Unicode code points.
+		n := 0
+		rune := make([]rune, len(input))
+		for _, r := range input {
+			rune[n] = r
+			n++
+		}
+		rune = rune[0:n]
+		// Reverse
+		for i := 0; i < n/2; i++ {
+			rune[i], rune[n-1-i] = rune[n-1-i], rune[i]
+		}
+		// Convert back to UTF-8.
+		output := string(rune)
+		return "(ﾉಥ益ಥ）ﾉ ┻━┻ " + output
 	case "github":
 		if len(command) > 1 && command[1] == "repos" {
 			return githubPrintReposList()
@@ -178,7 +193,7 @@ func handleRequest(req string) string {
 		if len(command) > 1 {
 			return printHelpFor(command[1])
 		}
-		return "try 'help <command>', supported commands are: time, github, fly, flip, stardate, untappd and weather"
+		return "try 'help <command>', supported commands are: time, github, fly, flip, stardate, untappd, weather, ip, strava"
 	case "ip":
 		if len(command) > 1 {
 			return geolocate(command[1])
@@ -191,6 +206,8 @@ func handleRequest(req string) string {
 		return getTimeIn("")
 	case "stardate":
 		return stardateCalc()
+	case "strava":
+		return "try 'help strava'"
 	case "weather":
 		if len(command) < 2 {
 			return weatherHelp
@@ -218,6 +235,8 @@ func printHelpFor(command string) string {
 		return weatherHelp
 	case "untappd":
 		return untappdHelp
+	case "strava":
+		return stravaHelp()
 	default:
 		return "there is no help for " + command
 	}
