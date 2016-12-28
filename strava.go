@@ -60,42 +60,30 @@ func watchStrava(irc *goirc.Connection) {
 			if isFirstRun {
 				continue
 			}
-			var aType string
-			switch activity.Type.String() {
-			case "Run":
-				aType = "ran"
-			case "Ride":
-				aType = "biked"
-			case "Hike":
-				aType = "hiked"
-			case "Kayaking":
-				aType = "kayaked"
-			default:
-				aType = activity.Type.String()
-			}
 			aDistance := activity.Distance / 1000
-			aDuration, err := time.ParseDuration(fmt.Sprintf("%ds", activity.ElapsedTime))
-			if err != nil {
-				log.Fatal(err)
-			}
 			aLocation := ""
 			geocoder := google.Geocoder(cfg.Strava.GoogleAPIKey)
 			address, _ := geocoder.ReverseGeocode(activity.StartLocation[0], activity.StartLocation[1])
 			if address != "" {
+				// Most addresses have the town, zip code and country in the last 3 CSV components,
+				// but some like France or UK have it in the last 2
+				splitLoc := 3
+				if strings.HasSuffix(address, "France") || strings.HasSuffix(address, "UK") {
+					splitLoc = 2
+				}
 				addressComp := strings.Split(address, ",")
-				if len(addressComp) > 3 {
-					aLocation = " around" + strings.Join(addressComp[len(addressComp)-3:], ",")
+				if len(addressComp) > splitLoc {
+					aLocation = " around" + strings.Join(addressComp[len(addressComp)-splitLoc:], ",")
 				} else {
 					aLocation = " around " + address
 				}
 			}
-			irc.Privmsg(irchan, fmt.Sprintf("%s %s %s %0.1fkm in %s%s: %s\n",
+			irc.Notice(irchan, fmt.Sprintf("%s %s went for a %0.1fkm %s%s strava.com/activities/%d",
 				activity.Athlete.FirstName, activity.Athlete.LastName,
-				aType,
 				aDistance,
-				aDuration,
+				strings.ToLower(activity.Name),
 				aLocation,
-				activity.Name))
+				activity.Id))
 		}
 		isFirstRun = false
 		time.Sleep(60 * time.Second)
