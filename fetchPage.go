@@ -53,8 +53,14 @@ func fetchTitle(url string) string {
 		if len(r) < 2 {
 			return ""
 		}
-		// convert some common html escape sequences back to readable strings
 		title := r[1]
+		// ignore titles that just say you should log in
+		shouldIgnore := regexp.MustCompile("(?i)(log|sign) in")
+		if shouldIgnore.MatchString(title) {
+			log.Println("ignoring title", title)
+			return ""
+		}
+		// convert some common html escape sequences back to readable strings
 		title = strings.Replace(title, "&ndash;", "-", -1)
 		title = strings.Replace(title, "&quot;", "\"", -1)
 		title = strings.Replace(title, "&#39;", "'", -1)
