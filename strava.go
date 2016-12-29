@@ -86,6 +86,6 @@ func watchStrava(irc *goirc.Connection) {
 				activity.Id))
 		}
 		isFirstRun = false
-		time.Sleep(60 * time.Second)
+		time.Sleep(600 * time.Second)
 	}
 }
