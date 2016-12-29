@@ -13,7 +13,7 @@ import (
 )
 
 func stravaHelp() string {
-	return fmt.Sprintf("Follow the Strava activities of members of club https://www.strava.com/dashboard?club_id=%d", cfg.Strava.ClubID)
+	return fmt.Sprintf("Follow the Strava activities of members of club https://www.strava.com/clubs/%d", cfg.Strava.ClubID)
 }
 
 func watchStrava(irc *goirc.Connection) {
