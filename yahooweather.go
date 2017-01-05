@@ -127,7 +127,7 @@ func getYahooForecast(location string) string {
 	}
 	return fmt.Sprintf("overcast in %s, %s: %dF/%dC. daylight from %s to %s. forecast: %s high %s low %s (%s); %s high %s low %s (%s)",
 		city, country, f, int32(float64(f-32)*0.5555), ast.Sunrise, ast.Sunset,
-		tomorrow.Day, tomorrow.High, tomorrow.Low, in2days.Text,
+		tomorrow.Day, tomorrow.High, tomorrow.Low, tomorrow.Text,
 		in2days.Day, in2days.High, in2days.Low, in2days.Text)
 
 }
