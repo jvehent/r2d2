@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codingsince1985/geo-golang/google"
 	"github.com/hashicorp/golang-lru"
 	strava "github.com/strava/go.strava"
 	goirc "github.com/thoj/go-ircevent"
@@ -53,19 +52,22 @@ func watchStrava(irc *goirc.Connection) {
 			log.Fatal(err)
 		}
 		for _, activity := range activities {
-			if activityCache.Contains(activity.Id) {
+			if activityCache.Contains(activity.Id) || activity.Private {
 				continue
 			}
 			activityCache.Add(activity.Id, time.Now())
 			if isFirstRun {
 				continue
 			}
+			aPace, _ := time.ParseDuration(fmt.Sprintf("%f", float64(activity.MovingTime)/(activity.Distance/float64(1000))))
 			aDistance := activity.Distance / 1000
-			irc.Notice(irchan, fmt.Sprintf("%s %s went for a %0.1fkm %s%s",
+			irc.Notice(irchan, fmt.Sprintf("%s %s went for a %0.1f km %s going up %0.1f meters at %s/km.",
 				activity.Athlete.FirstName, activity.Athlete.LastName,
 				aDistance,
 				strings.ToLower(activity.Name),
-				))
+				activity.TotalElevationGain,
+				aPace,
+			))
 		}
 		isFirstRun = false
 		time.Sleep(600 * time.Second)
