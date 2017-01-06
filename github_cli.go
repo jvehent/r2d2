@@ -90,6 +90,9 @@ func followRepoEvents(irc *goirc.Connection, cli *github.Client, owner, repo, ir
 					continue
 				}
 				for _, c := range pe.(*github.PushEvent).Commits {
+					if strings.Contains(*c.Message, "Merge pull request #") {
+						continue
+					}
 					time.Sleep(time.Second)
 					irc.Privmsgf(irchan, "\x032[%s/%s]\x03 %s - %s \x038https://github.com/%s/%s/commit/%s\x03",
 						owner, repo, *c.Author.Name, *c.Message, owner, repo, *c.SHA)
