@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"time"
 )
 
@@ -27,5 +28,17 @@ func getTimeIn(timezone string) string {
 		t := time.Now()
 		return "the time in " + timezone + " is " + t.In(loc).String()
 	}
-	return time.Now().UTC().String()
+	return worldtime()
+}
+
+func worldtime() (s string) {
+	t := time.Now()
+	for _, timezone := range []string{"America/Los_Angeles", "America/New_York", "Europe/London", "Europe/Paris", "Europe/Moscow", "Asia/Taipei", "Australia/Sydney", "Pacific/Auckland"} {
+		loc, err := time.LoadLocation(timezone)
+		if err != nil {
+			return "invalid time location: " + timezone
+		}
+		s += strings.Split(timezone, "/")[1] + "=" + t.In(loc).Format("15:04") + " "
+	}
+	return s
 }
