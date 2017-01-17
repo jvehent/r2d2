@@ -33,12 +33,21 @@ func getTimeIn(timezone string) string {
 
 func worldtime() (s string) {
 	t := time.Now()
-	for _, timezone := range []string{"America/Los_Angeles", "America/New_York", "Europe/London", "Europe/Paris", "Europe/Moscow", "Asia/Taipei", "Australia/Sydney", "Pacific/Auckland"} {
+	for _, timezone := range []string{"America/Los_Angeles", "America/New_York", "Europe/London", "Europe/Berlin", "Europe/Moscow", "Asia/Taipei", "Australia/Sydney", "Pacific/Auckland"} {
 		loc, err := time.LoadLocation(timezone)
 		if err != nil {
 			return "invalid time location: " + timezone
 		}
-		s += strings.Split(timezone, "/")[1] + "=" + t.In(loc).Format("15:04") + " "
+		city := strings.Split(timezone, "/")[1]
+		switch city {
+		case "Berlin":
+			city = "Paris/Berlin"
+		case "Los_Angeles":
+			city = "San Francisco"
+		case "New_York":
+			city = "New York/Toronto"
+		}
+		s += city + "=" + t.In(loc).Format("15:04") + " "
 	}
 	return s
 }
