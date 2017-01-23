@@ -10,7 +10,6 @@ import (
 
 	geo "github.com/oschwald/geoip2-golang"
 	goirc "github.com/thoj/go-ircevent"
-	"gopkg.in/gcfg.v1"
 )
 
 type Config struct {
@@ -91,7 +90,6 @@ func main() {
 	go watchGithub(irc)
 	go watchUntappd(irc)
 	go watchStrava(irc)
-	go fetchPageTitles(irc)
 	initMaxmind()
 
 	// add callback that captures messages sent to bot
