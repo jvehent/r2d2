@@ -40,3 +40,7 @@
 
 [maxmind]
     db = "/path/to/GeoIP2-City.mmdb"
+
+[url]
+    ignoredomains = "(github\.com)"
+    ignoretitles = "(log in|sign in|access denied|create and edit)"

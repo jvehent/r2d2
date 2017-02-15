@@ -44,6 +44,9 @@ type Config struct {
 		ClubID       int64
 		GoogleAPIKey string
 	}
+	Url struct {
+		IgnoreDomains, IgnoreTitles string
+	}
 }
 
 var cfg Config

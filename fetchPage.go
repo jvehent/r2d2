@@ -32,7 +32,17 @@ func fetchPageTitles(irc *goirc.Connection) {
 	})
 	return
 }
+
 func fetchTitle(url string) string {
+	if cfg.Url.IgnoreDomains != "" {
+		match, err := regexp.MatchString(cfg.Url.IgnoreDomains, url)
+		if err != nil {
+			log.Fatalf("Invalid ignore regexp: %v", err)
+		}
+		if match {
+			return ""
+		}
+	}
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Println("Failed to retrieve URL", url)
@@ -55,10 +65,12 @@ func fetchTitle(url string) string {
 		}
 		title := r[1]
 		// ignore titles that just say you should log in
-		shouldIgnore := regexp.MustCompile("(?i)(log|sign) in")
-		if shouldIgnore.MatchString(title) {
-			log.Println("ignoring title", title)
-			return ""
+		if cfg.Url.IgnoreTitles != "" {
+			shouldIgnore := regexp.MustCompile("(?i)" + cfg.Url.IgnoreTitles)
+			if shouldIgnore.MatchString(title) {
+				log.Println("ignoring title", title)
+				return ""
+			}
 		}
 		// convert some common html escape sequences back to readable strings
 		title = strings.Replace(title, "&ndash;", "-", -1)
