@@ -60,7 +60,7 @@ func watchStrava(irc *goirc.Connection) {
 				continue
 			}
 			aDistance := activity.Distance / 1000
-			aPace, _ := time.ParseDuration(fmt.Sprintf("%f", float64(activity.ElapsedTime)/aDistance))
+			aPace, _ := time.ParseDuration(fmt.Sprintf("%fs", float64(activity.ElapsedTime)/aDistance))
 			irc.Notice(irchan, fmt.Sprintf("%s %s went for a %0.1f km %s going up %0.1f meters at %s/km.",
 				activity.Athlete.FirstName, activity.Athlete.LastName,
 				aDistance,
