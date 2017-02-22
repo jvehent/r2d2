@@ -24,6 +24,7 @@ func watchGithub(irc *goirc.Connection) {
 	// start the github watcher
 	githubCli := makeGithubClient(cfg.Github.Token)
 	for _, repo := range cfg.Github.Repos {
+		destinationChannel := irchan
 		// first split on whitespaces. first part is the repo,
 		// optional second and third are the irc chan and pass
 		splitted := strings.Split(repo, " ")
@@ -32,22 +33,24 @@ func watchGithub(irc *goirc.Connection) {
 			irc.Privmsgf(irchan, "Invalid repository syntax '%s'. Must be 'owner/reponame <optional:#ircchan> <optional:channelpass>'", repo)
 			continue
 		}
+		repoOwner := reposplit[0]
+		repoName := reposplit[1]
 		// if there's a custom channel to send messages to, store it
 		if len(splitted) > 1 {
 			irc.Join(strings.Join(splitted[1:], " "))
-			irchan = splitted[1]
+			destinationChannel = splitted[1]
 		}
 		// don't run everything at once, we've got time...
 		time.Sleep(3 * time.Second)
 		go func() {
-			destinationChannel := irchan
 			for {
-				sleepfor := time.Duration(150 + (rand.Int() % 150))
-				time.Sleep(sleepfor * time.Second)
-				err = followRepoEvents(irc, githubCli, reposplit[0], reposplit[1], destinationChannel)
+				log.Printf("github: following repository %s/%s and sending messages into %s", repoOwner, repoName, destinationChannel)
+				err = followRepoEvents(irc, githubCli, repoOwner, repoName, destinationChannel)
 				if err != nil {
 					log.Println("github follower crashed with error", err)
 				}
+				sleepfor := time.Duration(150 + (rand.Int() % 150))
+				time.Sleep(sleepfor * time.Second)
 			}
 		}()
 	}
