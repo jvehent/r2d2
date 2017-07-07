@@ -170,6 +170,8 @@ func handleRequest(req string) string {
 	switch command[0] {
 	case "fly":
 		return "PPPPPPFFFFFfffffffffiiiiiiiiiuuuuuuuuuuuuuuuu....................."
+	case "shrug":
+		return `¯\_(ツ)_/¯ ` + strings.Join(command[1:], " ")
 	case "flip":
 		input := strings.Join(command[1:], " ")
 		// Get Unicode code points.
