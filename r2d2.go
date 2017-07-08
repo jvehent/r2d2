@@ -173,22 +173,7 @@ func handleRequest(req string) string {
 	case "shrug":
 		return `¯\_(ツ)_/¯ ` + strings.Join(command[1:], " ")
 	case "flip":
-		input := strings.Join(command[1:], " ")
-		// Get Unicode code points.
-		n := 0
-		rune := make([]rune, len(input))
-		for _, r := range input {
-			rune[n] = r
-			n++
-		}
-		rune = rune[0:n]
-		// Reverse
-		for i := 0; i < n/2; i++ {
-			rune[i], rune[n-1-i] = rune[n-1-i], rune[i]
-		}
-		// Convert back to UTF-8.
-		output := string(rune)
-		return "(ﾉಥ益ಥ）ﾉ ┻━┻ " + output
+		return flip(strings.Join(command[1:], " "))
 	case "github":
 		if len(command) > 1 && command[1] == "repos" {
 			return githubPrintReposList()
