@@ -97,8 +97,9 @@ func followRepoEvents(irc *goirc.Connection, cli *github.Client, owner, repo, ir
 						continue
 					}
 					time.Sleep(time.Second)
+					msg := strings.Replace(strings.Replace(*c.Message, "\n", " ", -1), "\r", " ", -1)
 					irc.Privmsgf(irchan, "\x032[%s/%s]\x03 %s - %s \x038https://github.com/%s/%s/commit/%s\x03",
-						owner, repo, *c.Author.Name, *c.Message, owner, repo, *c.SHA)
+						owner, repo, *c.Author.Name, msg, owner, repo, *c.SHA)
 				}
 			}
 		}
