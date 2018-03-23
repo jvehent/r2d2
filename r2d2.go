@@ -92,10 +92,11 @@ func main() {
 		}
 	}
 	go watchGithub(irc)
-	go watchUntappd(irc)
+	// this no longer works
+	//go watchUntappd(irc)
 	go watchStrava(irc)
 	go fetchPageTitles(irc)
-	initMaxmind()
+	//initMaxmind()
 
 	// add callback that captures messages sent to bot
 	terminate := make(chan bool)
@@ -184,11 +185,11 @@ func handleRequest(req string) string {
 			return printHelpFor(command[1])
 		}
 		return "try 'help <command>', supported commands are: time, github, fly, flip, stardate, untappd, weather, ip, strava"
-	case "ip":
-		if len(command) > 1 {
-			return geolocate(command[1])
-		}
-		return "try 'help ip'"
+	//case "ip":
+	//	if len(command) > 1 {
+	//		return geolocate(command[1])
+	//	}
+	//	return "try 'help ip'"
 	case "time":
 		if len(command) > 1 {
 			return getTimeIn(command[1])
@@ -219,8 +220,8 @@ func printHelpFor(command string) string {
 		return githubHelp
 	case "time":
 		return timeHelp
-	case "ip":
-		return geolocationHelp
+	//case "ip":
+	//	return geolocationHelp
 	case "weather":
 		return weatherHelp
 	case "untappd":
