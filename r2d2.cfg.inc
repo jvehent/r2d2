@@ -28,7 +28,6 @@
 [strava]
     accesstoken = "*****"
     clubid = 1234
-    googleapikey = "*****"
 
 [untappd]
     channel = "#beer"

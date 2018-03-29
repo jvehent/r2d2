@@ -39,10 +39,9 @@ type Config struct {
 		Reader    *geo.Reader
 	}
 	Strava struct {
-		Channel      string
-		AccessToken  string
-		ClubID       int64
-		GoogleAPIKey string
+		Channel     string
+		AccessToken string
+		ClubID      int64
 	}
 	Url struct {
 		IgnoreDomains, IgnoreTitles string
@@ -91,11 +90,11 @@ func main() {
 			irc.Privmsg(strings.Split(chp, " ")[0], "beep beedibeep dibeep")
 		}
 	}
-	go watchGithub(irc)
 	// this no longer works
 	//go watchUntappd(irc)
 	go watchStrava(irc)
 	go fetchPageTitles(irc)
+	go watchGithub(irc)
 	//initMaxmind()
 
 	// add callback that captures messages sent to bot

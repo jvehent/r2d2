@@ -29,10 +29,6 @@ func watchStrava(irc *goirc.Connection) {
 		log.Println("strava: missing club id, module disabled")
 		return
 	}
-	if cfg.Strava.GoogleAPIKey == "" {
-		log.Println("strava: missing google geocoding api key, module disabled")
-		return
-	}
 	client := strava.NewClient(cfg.Strava.AccessToken)
 	if client == nil {
 		log.Println("strava: failed to create client, module disabled")
@@ -44,6 +40,7 @@ func watchStrava(irc *goirc.Connection) {
 	}
 	isFirstRun := true
 	for {
+		log.Println("strava: initiating run")
 		activities, err := strava.NewClubsService(client).
 			ListActivities(cfg.Strava.ClubID).
 			PerPage(50).
@@ -52,11 +49,20 @@ func watchStrava(irc *goirc.Connection) {
 			log.Fatal(err)
 		}
 		for _, activity := range activities {
-			if activityCache.Contains(activity.Id) || activity.Private {
+			// a shitty cache key, definitely not cryptographically secure
+			cachekey := activity.Distance + activity.TotalElevationGain + float64(activity.MovingTime) + float64(activity.ElapsedTime)
+
+			if activityCache.Contains(cachekey) {
+				log.Printf("strava: skipping activity from %s %s, already in cache", activity.Athlete.FirstName, activity.Athlete.LastName)
 				continue
 			}
-			activityCache.Add(activity.Id, time.Now())
+			if activity.Private {
+				log.Printf("strava: skipping private activity %s %s", activity.Athlete.FirstName, activity.Athlete.LastName)
+				continue
+			}
+			activityCache.Add(cachekey, time.Now())
 			if isFirstRun {
+				log.Printf("strava: skipping activity %s %s because this is my first run and I'm populating my cache", activity.Athlete.FirstName, activity.Athlete.LastName)
 				continue
 			}
 			aDistance := activity.Distance / 1000
