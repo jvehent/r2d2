@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"math/rand"
 	"strings"
@@ -68,7 +69,8 @@ func makeGithubClient(token string) *github.Client {
 func followRepoEvents(irc *goirc.Connection, cli *github.Client, owner, repo, irchan string) (err error) {
 	lastID := "null"
 	for {
-		events, _, err := cli.Activity.ListRepositoryEvents(owner, repo, nil)
+		ctx := context.Background()
+		events, _, err := cli.Activity.ListRepositoryEvents(ctx, owner, repo, nil)
 		if err != nil {
 			return err
 		}
