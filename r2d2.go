@@ -42,6 +42,7 @@ type Config struct {
 		Channel     string
 		AccessToken string
 		ClubID      int64
+		NameMap     []string
 	}
 	Url struct {
 		IgnoreDomains, IgnoreTitles string

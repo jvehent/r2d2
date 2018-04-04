@@ -49,31 +49,41 @@ func watchStrava(irc *goirc.Connection) {
 			log.Fatal(err)
 		}
 		for _, activity := range activities {
+			var aRunner string
+			for _, mapping := range cfg.Strava.NameMap {
+				names := strings.Split(mapping, ":")
+				if len(names) != 2 {
+					log.Printf("malformed name mapping %q", mapping)
+					continue
+				}
+				if names[0] == activity.Athlete.FirstName+" "+activity.Athlete.LastName {
+					aRunner = names[1]
+				}
+			}
+			if aRunner == "" {
+				log.Printf("strava: skipping activity from %s %s, no name mapping", activity.Athlete.FirstName, activity.Athlete.LastName)
+				continue
+			}
 			// a shitty cache key, definitely not cryptographically secure
 			cachekey := activity.Distance + activity.TotalElevationGain + float64(activity.MovingTime) + float64(activity.ElapsedTime)
 
 			if activityCache.Contains(cachekey) {
-				log.Printf("strava: skipping activity from %s %s, already in cache", activity.Athlete.FirstName, activity.Athlete.LastName)
+				log.Printf("strava: skipping activity from %s, already in cache", aRunner)
 				continue
 			}
 			if activity.Private {
-				log.Printf("strava: skipping private activity %s %s", activity.Athlete.FirstName, activity.Athlete.LastName)
+				log.Printf("strava: skipping private activity %s", aRunner)
 				continue
 			}
 			activityCache.Add(cachekey, time.Now())
 			if isFirstRun {
-				log.Printf("strava: skipping activity %s %s because this is my first run and I'm populating my cache", activity.Athlete.FirstName, activity.Athlete.LastName)
+				log.Printf("strava: skipping activity %s because this is my first run and I'm populating my cache", aRunner)
 				continue
 			}
 			aDistance := activity.Distance / 1000
 			aPace, _ := time.ParseDuration(fmt.Sprintf("%ds", int64(float64(activity.MovingTime)/float64(aDistance))))
-			irc.Notice(irchan, fmt.Sprintf("%s %s went for a %0.1f km %s going up %0.1f meters at %s/km.",
-				activity.Athlete.FirstName, activity.Athlete.LastName,
-				aDistance,
-				strings.ToLower(activity.Name),
-				activity.TotalElevationGain,
-				aPace,
-			))
+			irc.Notice(irchan, fmt.Sprintf("%s went for a %0.1f km %s going up %0.1f meters at %s/km.",
+				aRunner, aDistance, strings.ToLower(activity.Name), activity.TotalElevationGain, aPace))
 		}
 		isFirstRun = false
 		time.Sleep(600 * time.Second)

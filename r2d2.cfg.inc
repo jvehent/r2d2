@@ -28,6 +28,7 @@
 [strava]
     accesstoken = "*****"
     clubid = 1234
+    namemap = "Julien V.:ulfr"
 
 [untappd]
     channel = "#beer"
