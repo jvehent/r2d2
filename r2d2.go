@@ -49,21 +49,24 @@ type Config struct {
 	}
 }
 
-var cfg Config
+var (
+	cfg        Config
+	configFile = "r2d2.cfg"
+)
 
 func main() {
 	var (
 		irc *goirc.Connection
 		err error
 	)
-	var configFile = flag.String("c", "r2d2.cfg", "Load configuration from file")
+	flag.StringVar(&configFile, "c", "r2d2.cfg", "Load configuration from file")
 	flag.Parse()
-	_, err = os.Stat(*configFile)
+	_, err = os.Stat(configFile)
 	if err != nil {
 		log.Fatal("%v", err)
 		os.Exit(1)
 	}
-	err = gcfg.ReadFileInto(&cfg, *configFile)
+	err = gcfg.ReadFileInto(&cfg, configFile)
 	if err != nil {
 		log.Fatal("Error in configuration file: %v", err)
 		os.Exit(1)
@@ -184,7 +187,7 @@ func handleRequest(req string) string {
 		if len(command) > 1 {
 			return printHelpFor(command[1])
 		}
-		return "try 'help <command>', supported commands are: time, github, fly, flip, stardate, untappd, weather, ip, strava"
+		return "try 'help <command>', supported commands are: time, github, fly, flip, stardate, weather, strava, reloadconf"
 	//case "ip":
 	//	if len(command) > 1 {
 	//		return geolocate(command[1])
@@ -209,6 +212,13 @@ func handleRequest(req string) string {
 			return untappdPrintUsers()
 		}
 		return "try 'help untappd'"
+	case "reloadconf":
+		err := gcfg.ReadFileInto(&cfg, configFile)
+		if err != nil {
+			log.Fatal("Error in configuration file: %v", err)
+			os.Exit(1)
+		}
+		return "configuration reloaded successfully"
 	default:
 		return "I do not know how to answer this..."
 	}
