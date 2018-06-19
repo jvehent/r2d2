@@ -47,6 +47,11 @@ type Config struct {
 	Url struct {
 		IgnoreDomains, IgnoreTitles string
 	}
+	Morning struct {
+		Hour    int
+		Channel string
+		Who     string
+	}
 }
 
 var (
@@ -99,6 +104,7 @@ func main() {
 	go watchStrava(irc)
 	go fetchPageTitles(irc)
 	go watchGithub(irc)
+	go sayGoodMorning(irc)
 	//initMaxmind()
 
 	// add callback that captures messages sent to bot
@@ -242,5 +248,17 @@ func printHelpFor(command string) string {
 		return stravaHelp()
 	default:
 		return "there is no help for " + command
+	}
+}
+
+func sayGoodMorning(irc *goirc.Connection) {
+	for {
+		if time.Now().UTC().Hour() > cfg.Morning.Hour && time.Now().UTC().Hour() < (cfg.Morning.Hour+1) {
+			if time.Now().Weekday() > 0 && time.Now().Weekday() < 6 {
+				// only during weekdays
+				irc.Privmsgf(cfg.Morning.Channel, "Good Morning %s", cfg.Morning.Who)
+			}
+		}
+		time.Sleep(60*time.Minute + 37*time.Second)
 	}
 }

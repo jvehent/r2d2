@@ -44,3 +44,8 @@
 [url]
     ignoredomains = "(github\.com)"
     ignoretitles = "(log in|sign in|access denied|create and edit)"
+
+[morning]
+    hour    = 13
+    channel = "#foo"
+    who     = "ulfr"
