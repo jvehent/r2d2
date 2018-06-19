@@ -213,11 +213,13 @@ func handleRequest(req string) string {
 		}
 		return "try 'help untappd'"
 	case "reloadconf":
-		err := gcfg.ReadFileInto(&cfg, configFile)
+		var cfg2 Config
+		err := gcfg.ReadFileInto(&cfg2, configFile)
 		if err != nil {
 			log.Fatal("Error in configuration file: %v", err)
 			os.Exit(1)
 		}
+		cfg = cfg2
 		return "configuration reloaded successfully"
 	default:
 		return "I do not know how to answer this..."
