@@ -253,7 +253,7 @@ func printHelpFor(command string) string {
 
 func sayGoodMorning(irc *goirc.Connection) {
 	for {
-		if time.Now().UTC().Hour() > cfg.Morning.Hour && time.Now().UTC().Hour() < (cfg.Morning.Hour+1) {
+		if time.Now().UTC().Hour() == cfg.Morning.Hour {
 			if time.Now().Weekday() > 0 && time.Now().Weekday() < 6 {
 				// only during weekdays
 				irc.Privmsgf(cfg.Morning.Channel, "Good Morning %s", cfg.Morning.Who)
