@@ -178,6 +178,8 @@ func handleRequest(req string) string {
 	log.Printf("handling request %q", req)
 	command := strings.Split(req, " ")
 	switch command[0] {
+	case "morning", "good morning", "Good Morning", "Good morning", "Morning":
+		return goodMorning()
 	case "fly":
 		return "PPPPPPFFFFFfffffffffiiiiiiiiiuuuuuuuuuuuuuuuu....................."
 	case "shrug":
@@ -248,17 +250,5 @@ func printHelpFor(command string) string {
 		return stravaHelp()
 	default:
 		return "there is no help for " + command
-	}
-}
-
-func sayGoodMorning(irc *goirc.Connection) {
-	for {
-		if time.Now().UTC().Hour() == cfg.Morning.Hour {
-			if time.Now().Weekday() > 0 && time.Now().Weekday() < 6 {
-				// only during weekdays
-				irc.Privmsgf(cfg.Morning.Channel, "Good Morning %s", cfg.Morning.Who)
-			}
-		}
-		time.Sleep(60*time.Minute + 37*time.Second)
 	}
 }
