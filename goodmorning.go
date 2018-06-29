@@ -2,10 +2,13 @@ package main
 
 import (
 	"math/rand"
+	"regexp"
 	"time"
 
 	goirc "github.com/thoj/go-ircevent"
 )
+
+var goodMorningRe = regexp.MustCompile("(?i)(morning|ohai|howdy|what's up|hiya|hey)")
 
 func sayGoodMorning(irc *goirc.Connection) {
 	for {

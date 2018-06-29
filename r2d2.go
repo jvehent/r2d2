@@ -176,10 +176,11 @@ func handleAuth(irc *goirc.Connection) {
 // at the first word as a keyword.
 func handleRequest(req string) string {
 	log.Printf("handling request %q", req)
+	if goodMorningRe.MatchString(req) {
+		return goodMorning()
+	}
 	command := strings.Split(req, " ")
 	switch command[0] {
-	case "morning", "good morning", "Good Morning", "Good morning", "Morning":
-		return goodMorning()
 	case "fly":
 		return "PPPPPPFFFFFfffffffffiiiiiiiiiuuuuuuuuuuuuuuuu....................."
 	case "shrug":
